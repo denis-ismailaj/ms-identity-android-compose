@@ -42,7 +42,7 @@ import com.google.android.material.navigation.NavigationView
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
     OnFragmentInteractionListener {
     internal enum class AppFragment {
-        SingleAccount, MultipleAccount, B2C
+        SingleAccount, MultipleAccount
     }
 
     private var mCurrentFragment: AppFragment? = null
@@ -81,9 +81,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 if (id == R.id.nav_multiple_account) {
                     setCurrentFragment(AppFragment.MultipleAccount)
                 }
-                if (id == R.id.nav_b2c) {
-                    setCurrentFragment(AppFragment.B2C)
-                }
 
                 drawer.removeDrawerListener(this)
             }
@@ -115,11 +112,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 supportActionBar!!.setBackgroundDrawable(ColorDrawable(Color.BLUE))
                 return
             }
-            AppFragment.B2C -> {
-                supportActionBar!!.title = "B2C Mode"
-                supportActionBar!!.setBackgroundDrawable(ColorDrawable(Color.BLUE))
-                return
-            }
 
             else -> {
                 return
@@ -135,10 +127,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             AppFragment.MultipleAccount -> {
                 attachFragment(MultipleAccountModeFragment())
-                return
-            }
-            AppFragment.B2C -> {
-                attachFragment(B2CModeFragment())
                 return
             }
 
