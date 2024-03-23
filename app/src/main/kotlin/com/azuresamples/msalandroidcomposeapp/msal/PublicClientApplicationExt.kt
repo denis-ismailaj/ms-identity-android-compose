@@ -15,17 +15,17 @@ object PublicClientApplicationExt {
     suspend fun createSingleAccountPublicClientApplication(
         context: Context,
         configFileResourceId: Int,
-    ): ISingleAccountPublicClientApplication? =
+    ): ISingleAccountPublicClientApplication =
         suspendCancellableCoroutine { continuation ->
             PublicClientApplication.createSingleAccountPublicClientApplication(
                 /* context = */ context,
                 /* configFileResourceId = */ configFileResourceId,
                 /* listener = */ object : ISingleAccountApplicationCreatedListener {
-                    override fun onCreated(application: ISingleAccountPublicClientApplication?) {
+                    override fun onCreated(application: ISingleAccountPublicClientApplication) {
                         continuation.resume(application)
                     }
 
-                    override fun onError(exception: MsalException?) {
+                    override fun onError(exception: MsalException) {
                         continuation.cancel(exception)
                     }
                 }
@@ -35,17 +35,17 @@ object PublicClientApplicationExt {
     suspend fun createMultipleAccountPublicClientApplication(
         context: Context,
         configFileResourceId: Int,
-    ): IMultipleAccountPublicClientApplication? =
+    ): IMultipleAccountPublicClientApplication =
         suspendCancellableCoroutine { continuation ->
             PublicClientApplication.createMultipleAccountPublicClientApplication(
                 /* context = */ context,
                 /* configFileResourceId = */ configFileResourceId,
                 /* listener = */ object : IMultipleAccountApplicationCreatedListener {
-                    override fun onCreated(application: IMultipleAccountPublicClientApplication?) {
+                    override fun onCreated(application: IMultipleAccountPublicClientApplication) {
                         continuation.resume(application)
                     }
 
-                    override fun onError(exception: MsalException?) {
+                    override fun onError(exception: MsalException) {
                         continuation.cancel(exception)
                     }
                 }

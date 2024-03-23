@@ -22,7 +22,6 @@ suspend fun ISingleAccountPublicClientApplication.getCurrentAccountSuspend(): IA
             }
 
             override fun onAccountChanged(priorAccount: IAccount?, currentAccount: IAccount?) {
-                continuation.resume(currentAccount)
             }
 
             override fun onError(exception: MsalException) {
