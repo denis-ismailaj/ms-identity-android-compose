@@ -35,7 +35,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.azuresamples.msalandroidkotlinapp.ui.multi.MultiAccountModeScreen
 import com.azuresamples.msalandroidkotlinapp.ui.single.SingleAccountModeScreen
-import com.azuresamples.msalandroidkotlinapp.ui.theme.MsidentitykotlinsampleTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -43,7 +42,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MsidentitykotlinsampleTheme {
+            MaterialTheme {
                 Content()
             }
         }
