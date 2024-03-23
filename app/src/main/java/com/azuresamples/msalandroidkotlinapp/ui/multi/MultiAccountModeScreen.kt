@@ -196,7 +196,7 @@ fun MultiAccountModeScreen(
             Spacer(Modifier.height(8.dp))
 
             FilledTonalButton(
-                onClick = { viewModel.callGraphSilent(context) },
+                onClick = { viewModel.callGraphSilent() },
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Get Graph Data Silently")

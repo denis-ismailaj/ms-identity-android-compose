@@ -1,6 +1,6 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    kotlin("android")
 }
 
 android {
@@ -27,8 +27,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        signingConfig = signingConfigs.getByName("debug")
 
+        signingConfig = signingConfigs.getByName("debug")
     }
 
     buildTypes {
@@ -50,7 +50,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
     packaging {
         resources {
@@ -62,34 +62,16 @@ android {
 }
 
 dependencies {
-    implementation("io.opentelemetry:opentelemetry-api:1.18.0")
-    implementation("io.opentelemetry:opentelemetry-context:1.18.0")
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation("androidx.activity:activity-compose:1.7.0")
+    implementation("androidx.activity:activity-compose:1.8.2")
     implementation(platform("androidx.compose:compose-bom:2024.02.02"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
-    implementation ("androidx.appcompat:appcompat:1.1.0")
-    implementation ("androidx.core:core-ktx:1.1.0")
-    implementation ("androidx.constraintlayout:constraintlayout:1.1.3")
-    implementation ("com.google.android.material:material:1.0.0")
-    implementation ("com.android.volley:volley:1.2.1")
-    implementation ("androidx.legacy:legacy-support-v4:1.0.0")
 
-    implementation ("com.microsoft.identity.client:msal:5.+")
-    {
-        exclude(group = "io.opentelemetry")
-        exclude (group="com.microsoft.device.display")
+    implementation("io.ktor:ktor-client-android:2.3.8")
+
+    implementation("com.microsoft.identity.client:msal:5.2.0") {
+        exclude(group = "com.microsoft.device.display")
     }
-
-    implementation("com.microsoft.graph:microsoft-graph:5.80.0")
-
-    implementation("com.azure:azure-identity:1.10.0")
 }

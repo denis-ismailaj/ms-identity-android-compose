@@ -160,10 +160,7 @@ class SingleViewModel : ViewModel() {
                     Log.d(TAG, "Successfully authenticated")
                     Log.d(TAG, "ID Token: " + authenticationResult.account.claims?.get("id_token"))
 
-                    callGraphAPI(
-                        context = activity,
-                        accessToken = authenticationResult.accessToken,
-                    )
+                    callGraphAPI(accessToken = authenticationResult.accessToken)
                 }
 
                 override fun onError(exception: MsalException) {
@@ -201,7 +198,7 @@ class SingleViewModel : ViewModel() {
         app.value?.acquireToken(parameters)
     }
 
-    fun callGraphSilent(context: Context) {
+    fun callGraphSilent() {
         clearOutput()
 
         val silentParameters = AcquireTokenSilentParameters.Builder()
@@ -213,10 +210,7 @@ class SingleViewModel : ViewModel() {
                     Log.d(TAG, "Successfully authenticated")
 
                     /* Successfully got a token, use it to call a protected resource - MSGraph */
-                    callGraphAPI(
-                        context = context,
-                        accessToken = authenticationResult.accessToken,
-                    )
+                    callGraphAPI(accessToken = authenticationResult.accessToken)
                 }
 
                 override fun onError(exception: MsalException) {
@@ -255,21 +249,22 @@ class SingleViewModel : ViewModel() {
      * If you're developing an app for sovereign cloud users, please change the Microsoft Graph Resource URL accordingly.
      * https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints
      */
-    private fun callGraphAPI(context: Context, accessToken: String) {
-        MSGraphRequestWrapper.callGraphAPIUsingVolley(
-            context,
-            msGraphUrl.value,
-            accessToken,
-            responseListener = { response ->
-                /* Successfully called graph, process data and send to UI */
+    private fun callGraphAPI(accessToken: String) {
+        viewModelScope.launch {
+            try {
+                val response = MSGraphRequestWrapper.callGraphAPI(
+                    graphResourceUrl = msGraphUrl.value,
+                    accessToken = accessToken,
+                )
+
                 Log.d(TAG, "Response: $response")
                 showResult(response)
-            },
-            errorListener = { error ->
-                Log.d(TAG, "Error: $error")
-                showException(error)
-            },
-        )
+
+            } catch (e: Exception) {
+                Log.d(TAG, "Error: $e")
+                showException(e)
+            }
+        }
     }
 
     private fun showException(exception: Exception) {
