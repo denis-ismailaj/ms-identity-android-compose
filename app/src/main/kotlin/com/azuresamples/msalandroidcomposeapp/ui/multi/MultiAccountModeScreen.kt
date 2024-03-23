@@ -1,4 +1,6 @@
-package com.azuresamples.msalandroidkotlinapp.ui.single
+@file:OptIn(ExperimentalMaterial3Api::class)
+
+package com.azuresamples.msalandroidcomposeapp.ui.multi
 
 import android.graphics.Typeface
 import androidx.compose.foundation.layout.Column
@@ -8,7 +10,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -18,27 +24,32 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.azuresamples.msalandroidkotlinapp.ui.findActivity
+import com.azuresamples.msalandroidcomposeapp.ui.findActivity
 
 
 @Composable
-fun SingleAccountModeScreen(
+fun MultiAccountModeScreen(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: SingleViewModel = viewModel()
+    val viewModel: MultiViewModel = viewModel()
 
-    val account by viewModel.account.collectAsStateWithLifecycle()
+    val accounts by viewModel.accounts.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     val activity = context.findActivity()
@@ -46,19 +57,19 @@ fun SingleAccountModeScreen(
     LaunchedEffect(Unit) {
         viewModel.initAuth(context)
 
-        viewModel.signOutEvent.collect {
-            snackbarHostState.showSnackbar("Signed out")
+        viewModel.accountRemovedEvent.collect {
+            snackbarHostState.showSnackbar("Account removed")
         }
     }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         /*
-         * The account may have been removed from the device (if broker is in use).
+         * Accounts may have been removed from the device (if broker is in use).
          *
-         * In shared device mode, the account might be signed in/out by other apps while this app is not in focus.
-         * Therefore, we want to update the account state by invoking loadAccount() here.
+         * In shared device mode, accounts might be signed in/out by other apps while this app is not in focus.
+         * Therefore, we want to update the accounts state by invoking loadAccounts() here.
          */
-        viewModel.loadAccount()
+        viewModel.loadAccounts()
     }
 
     Column(
@@ -94,14 +105,57 @@ fun SingleAccountModeScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = account?.username ?: "None",
-            onValueChange = {},
-            readOnly = true,
-            singleLine = true,
-            label = { Text(text = "Signed-in user") },
-            modifier = Modifier.fillMaxWidth(),
-        )
+        var expanded by remember { mutableStateOf(false) }
+
+        val focusManager = LocalFocusManager.current
+
+        val selectedAccount by viewModel.selectedAccount.collectAsStateWithLifecycle()
+
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = it },
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
+                readOnly = true,
+                value = selectedAccount?.username ?: "",
+                onValueChange = { },
+                label = { Text("Account") },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = expanded
+                    )
+                },
+                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+            )
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = {
+                    focusManager.clearFocus()
+                    expanded = false
+                },
+                properties = PopupProperties(focusable = false),
+                modifier = Modifier.exposedDropdownSize()
+            ) {
+                accounts?.forEach { account ->
+                    DropdownMenuItem(
+                        onClick = {
+                            viewModel.selectedAccount.value = account
+                            focusManager.clearFocus()
+                            expanded = false
+                        },
+                        text = {
+                            Text(text = account.username)
+                        },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                    )
+                }
+            }
+        }
+
 
         Spacer(Modifier.height(16.dp))
 
@@ -122,19 +176,12 @@ fun SingleAccountModeScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        if (account == null) {
-            Button(
-                onClick = { viewModel.signIn(activity) },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Sign In")
-            }
-        } else {
+        if (selectedAccount != null) {
             OutlinedButton(
-                onClick = { viewModel.signOut() },
+                onClick = { viewModel.removeAccount() },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Sign Out")
+                Text("Remove account")
             }
 
             Spacer(Modifier.height(8.dp))

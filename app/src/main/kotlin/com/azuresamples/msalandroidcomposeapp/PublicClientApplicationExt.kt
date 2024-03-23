@@ -1,4 +1,4 @@
-package com.azuresamples.msalandroidkotlinapp
+package com.azuresamples.msalandroidcomposeapp
 
 import android.content.Context
 import com.microsoft.identity.client.IMultipleAccountPublicClientApplication

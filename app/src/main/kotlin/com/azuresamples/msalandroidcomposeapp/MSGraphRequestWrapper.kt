@@ -1,4 +1,4 @@
-package com.azuresamples.msalandroidkotlinapp
+package com.azuresamples.msalandroidcomposeapp
 
 import android.util.Log
 import io.ktor.client.HttpClient

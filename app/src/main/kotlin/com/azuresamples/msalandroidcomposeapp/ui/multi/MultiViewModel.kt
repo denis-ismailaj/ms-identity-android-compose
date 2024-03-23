@@ -1,13 +1,13 @@
-package com.azuresamples.msalandroidkotlinapp.ui.multi
+package com.azuresamples.msalandroidcomposeapp.ui.multi
 
 import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.azuresamples.msalandroidkotlinapp.MSGraphRequestWrapper
-import com.azuresamples.msalandroidkotlinapp.PublicClientApplicationExt
-import com.azuresamples.msalandroidkotlinapp.R
+import com.azuresamples.msalandroidcomposeapp.MSGraphRequestWrapper
+import com.azuresamples.msalandroidcomposeapp.PublicClientApplicationExt
+import com.azuresamples.msalandroidcomposeapp.R
 import com.microsoft.identity.client.AcquireTokenParameters
 import com.microsoft.identity.client.AcquireTokenSilentParameters
 import com.microsoft.identity.client.AuthenticationCallback

@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ms-identity-kotlin-sample"
+rootProject.name = "ms-identity-compose-sample"
 include(":app")

@@ -5,7 +5,7 @@
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="ms-identity-kotlin-sample"
+        android:label="ms-identity-compose-sample"
         android:supportsRtl="true"
         android:theme="@style/android:Theme.Material.Light.NoActionBar"
         tools:ignore="DataExtractionRules">

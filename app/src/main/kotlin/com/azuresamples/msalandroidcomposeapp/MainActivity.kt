@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.azuresamples.msalandroidkotlinapp
+package com.azuresamples.msalandroidcomposeapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -33,8 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.azuresamples.msalandroidkotlinapp.ui.multi.MultiAccountModeScreen
-import com.azuresamples.msalandroidkotlinapp.ui.single.SingleAccountModeScreen
+import com.azuresamples.msalandroidcomposeapp.ui.multi.MultiAccountModeScreen
+import com.azuresamples.msalandroidcomposeapp.ui.single.SingleAccountModeScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {

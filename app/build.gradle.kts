@@ -14,11 +14,11 @@ android {
         }
     }
 
-    namespace = "com.azuresamples.msalandroidkotlinapp"
+    namespace = "com.azuresamples.msalandroidcomposeapp"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.azuresamples.msalandroidkotlinapp"
+        applicationId = "com.azuresamples.msalandroidcomposeapp"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

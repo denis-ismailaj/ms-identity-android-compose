@@ -1,9 +1,8 @@
-package com.azuresamples.msalandroidkotlinapp.ui
+package com.azuresamples.msalandroidcomposeapp.ui
 
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-
 
 internal fun Context.findActivity(): Activity {
     var context = this
