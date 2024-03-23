@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
  * This requires "account_mode" to be set as "SINGLE" in the configuration file.
  * (Please see res/raw/auth_config_single_account.json for more info).
  */
-class SingleViewModel : ViewModel() {
+class SingleAccountViewModel : ViewModel() {
 
     private val _output = MutableStateFlow<String?>(null)
     val output: StateFlow<String?> = _output

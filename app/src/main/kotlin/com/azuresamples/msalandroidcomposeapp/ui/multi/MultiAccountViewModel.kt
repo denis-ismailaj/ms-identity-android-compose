@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 /**
  * Implementation sample for 'Multiple account' mode.
  */
-class MultiViewModel : ViewModel() {
+class MultiAccountViewModel : ViewModel() {
 
     private val _output = MutableStateFlow<String?>(null)
     val output: StateFlow<String?> = _output

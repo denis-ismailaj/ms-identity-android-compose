@@ -47,7 +47,7 @@ fun MultiAccountModeScreen(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: MultiViewModel = viewModel()
+    val viewModel: MultiAccountViewModel = viewModel()
 
     val accounts by viewModel.accounts.collectAsStateWithLifecycle()
 

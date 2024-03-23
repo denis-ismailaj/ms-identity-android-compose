@@ -36,7 +36,7 @@ fun SingleAccountModeScreen(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: SingleViewModel = viewModel()
+    val viewModel: SingleAccountViewModel = viewModel()
 
     val account by viewModel.account.collectAsStateWithLifecycle()
 
