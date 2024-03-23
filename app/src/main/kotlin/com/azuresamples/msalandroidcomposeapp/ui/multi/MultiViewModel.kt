@@ -6,17 +6,16 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.azuresamples.msalandroidcomposeapp.MSGraphRequestWrapper
-import com.azuresamples.msalandroidcomposeapp.msal.PublicClientApplicationExt
 import com.azuresamples.msalandroidcomposeapp.R
+import com.azuresamples.msalandroidcomposeapp.msal.PublicClientApplicationExt
+import com.azuresamples.msalandroidcomposeapp.msal.acquireTokenSilentSuspend
+import com.azuresamples.msalandroidcomposeapp.msal.acquireTokenSuspend
+import com.azuresamples.msalandroidcomposeapp.msal.getAccountsSuspend
+import com.azuresamples.msalandroidcomposeapp.msal.removeAccountSuspend
 import com.microsoft.identity.client.AcquireTokenParameters
 import com.microsoft.identity.client.AcquireTokenSilentParameters
-import com.microsoft.identity.client.AuthenticationCallback
 import com.microsoft.identity.client.IAccount
-import com.microsoft.identity.client.IAuthenticationResult
 import com.microsoft.identity.client.IMultipleAccountPublicClientApplication
-import com.microsoft.identity.client.IMultipleAccountPublicClientApplication.RemoveAccountCallback
-import com.microsoft.identity.client.IPublicClientApplication.LoadAccountsCallback
-import com.microsoft.identity.client.SilentAuthenticationCallback
 import com.microsoft.identity.client.exception.MsalClientException
 import com.microsoft.identity.client.exception.MsalException
 import com.microsoft.identity.client.exception.MsalServiceException
@@ -73,16 +72,13 @@ class MultiViewModel : ViewModel() {
      * Load currently signed-in accounts, if there's any.
      */
     fun loadAccounts() {
-        app.value?.getAccounts(object : LoadAccountsCallback {
-            override fun onTaskCompleted(result: List<IAccount>?) {
-                // You can use the account data to update your UI or your app database.
-                _accounts.value = result
-            }
-
-            override fun onError(exception: MsalException) {
+        viewModelScope.launch {
+            try {
+                _accounts.value = app.value?.getAccountsSuspend()
+            } catch (exception: MsalException) {
                 showException(exception)
             }
-        })
+        }
     }
 
     fun removeAccount() {
@@ -90,68 +86,26 @@ class MultiViewModel : ViewModel() {
          * Removes the selected account and cached tokens from this app
          * (or device, if the device is in shared mode).
          */
-        app.value?.removeAccount(selectedAccount.value, object : RemoveAccountCallback {
-            override fun onRemoved() {
+        val account = selectedAccount.value ?: return
+
+        viewModelScope.launch {
+            try {
+                app.value?.removeAccountSuspend(account)
+
                 selectedAccount.value = null
                 clearOutput()
                 triggerAccountRemovedMessage()
 
                 // Get the up-to-date list of accounts
                 loadAccounts()
-            }
 
-            override fun onError(exception: MsalException) {
+            } catch (exception: MsalException) {
                 showException(exception)
             }
-        })
+        }
     }
 
-
     fun callGraphInteractive(activity: Activity) {
-        clearOutput()
-
-        val parameters = AcquireTokenParameters.Builder()
-            .startAuthorizationFromActivity(activity)
-            .withScopes(scopes.value)
-            .withCallback(object : AuthenticationCallback {
-                /**
-                 * Callback used for interactive request.
-                 * If it succeeds we use the access token to call Microsoft Graph.
-                 * Does not check cache.
-                 */
-
-                override fun onSuccess(authenticationResult: IAuthenticationResult) {
-                    /* Successfully got a token, use it to call a protected resource - MSGraph */
-                    Log.d(TAG, "Successfully authenticated")
-                    Log.d(TAG, "ID Token: " + authenticationResult.account.claims?.get("id_token"))
-
-                    callGraphAPI(accessToken = authenticationResult.accessToken)
-
-                    // Get up-to-date list of accounts
-                    loadAccounts()
-                }
-
-                override fun onError(exception: MsalException) {
-                    /* Failed to acquireToken */
-                    Log.d(TAG, "Authentication failed: $exception")
-
-                    showException(exception)
-
-                    @Suppress("ControlFlowWithEmptyBody")
-                    if (exception is MsalClientException) {
-                        /* Exception inside MSAL, more info inside MsalError.java */
-                    } else if (exception is MsalServiceException) {
-                        /* Exception when communicating with the STS, likely config issue */
-                    }
-                }
-
-                override fun onCancel() {
-                    /* User canceled the authentication */
-                    Log.d(TAG, "User cancelled login.")
-                }
-            })
-            .forAccount(selectedAccount.value)
-            .build()
         /*
          * Acquire token interactively. It will also create an account object for the silent call as a result.
          *
@@ -163,52 +117,91 @@ class MultiViewModel : ViewModel() {
          *  - the resource you're acquiring a token for has a stricter set of requirement than your Single Sign-On refresh token.
          *  - you're introducing a new scope which the user has never consented for.
          */
-        app.value?.acquireToken(parameters)
+
+        clearOutput()
+
+        val parameters = AcquireTokenParameters.Builder()
+            .startAuthorizationFromActivity(activity)
+            .withScopes(scopes.value)
+            .forAccount(selectedAccount.value)
+            .build()
+
+        viewModelScope.launch {
+            try {
+                val authResult = app.value?.acquireTokenSuspend(parameters)
+                    ?: return@launch
+
+                /* Successfully got a token, use it to call a protected resource - MSGraph */
+                Log.d(TAG, "Successfully authenticated")
+                Log.d(TAG, "ID Token: " + authResult.account.claims?.get("id_token"))
+
+                callGraphAPI(accessToken = authResult.accessToken)
+
+                // Get up-to-date list of accounts
+                loadAccounts()
+
+            } catch (exception: MsalException) {
+                /* Failed to acquireToken */
+                Log.d(TAG, "Authentication failed: $exception")
+
+                showException(exception)
+
+                @Suppress("ControlFlowWithEmptyBody")
+                if (exception is MsalClientException) {
+                    /* Exception inside MSAL, more info inside MsalError.java */
+                } else if (exception is MsalServiceException) {
+                    /* Exception when communicating with the STS, likely config issue */
+                }
+            }
+        }
     }
 
     fun callGraphSilent() {
+        /*
+         * Perform acquireToken without interrupting the user.
+         *
+         * This requires an account object of the account you're obtaining a token for.
+         */
+
         clearOutput()
 
         val silentParameters = AcquireTokenSilentParameters.Builder()
             .fromAuthority(selectedAccount.value?.authority)
             .forAccount(selectedAccount.value)
             .withScopes(scopes.value)
-            .withCallback(object : SilentAuthenticationCallback {
-                override fun onSuccess(authenticationResult: IAuthenticationResult) {
-                    Log.d(TAG, "Successfully authenticated")
+            .build()
 
-                    /* Successfully got a token, use it to call a protected resource - MSGraph */
-                    callGraphAPI(accessToken = authenticationResult.accessToken)
-                }
+        viewModelScope.launch {
+            try {
+                val authResult = app.value?.acquireTokenSilentSuspend(silentParameters)
+                    ?: return@launch
 
-                override fun onError(exception: MsalException) {
-                    /* Failed to acquireToken */
-                    Log.d(TAG, "Authentication failed: $exception")
+                Log.d(TAG, "Successfully authenticated")
 
-                    showException(exception)
+                /* Successfully got a token, use it to call a protected resource - MSGraph */
+                callGraphAPI(accessToken = authResult.accessToken)
 
-                    when (exception) {
-                        is MsalClientException -> {
-                            /* Exception inside MSAL, more info inside MsalError.java */
-                        }
+            } catch (exception: MsalException) {
+                /* Failed to acquireToken */
+                Log.d(TAG, "Authentication failed: $exception")
 
-                        is MsalServiceException -> {
-                            /* Exception when communicating with the STS, likely config issue */
-                        }
+                showException(exception)
 
-                        is MsalUiRequiredException -> {
-                            /* Tokens expired or no session, retry with interactive */
-                        }
+                when (exception) {
+                    is MsalClientException -> {
+                        /* Exception inside MSAL, more info inside MsalError.java */
+                    }
+
+                    is MsalServiceException -> {
+                        /* Exception when communicating with the STS, likely config issue */
+                    }
+
+                    is MsalUiRequiredException -> {
+                        /* Tokens expired or no session, retry with interactive */
                     }
                 }
-            })
-            .build()
-        /*
-         * Perform acquireToken without interrupting the user.
-         *
-         * This requires an account object of the account you're obtaining a token for.
-         */
-        app.value?.acquireTokenSilentAsync(silentParameters)
+            }
+        }
     }
 
     /**
