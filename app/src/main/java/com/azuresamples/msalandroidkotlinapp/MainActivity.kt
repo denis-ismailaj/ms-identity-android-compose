@@ -1,147 +1,134 @@
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.azuresamples.msalandroidkotlinapp
 
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.MenuItem
-import android.view.View
-import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.drawerlayout.widget.DrawerLayout.DrawerListener
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
-import com.azuresamples.msalandroidkotlinapp.SingleAccountModeFragment
-import com.google.android.material.navigation.NavigationView
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.azuresamples.msalandroidkotlinapp.ui.multi.MultiAccountModeScreen
+import com.azuresamples.msalandroidkotlinapp.ui.single.SingleAccountModeScreen
+import com.azuresamples.msalandroidkotlinapp.ui.theme.MsidentitykotlinsampleTheme
+import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
-    OnFragmentInteractionListener {
-    internal enum class AppFragment {
-        SingleAccount, MultipleAccount
-    }
-
-    private var mCurrentFragment: AppFragment? = null
-    private var mContentMain: ConstraintLayout? = null
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        mContentMain = findViewById(R.id.content_main)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
-        val navigationView = findViewById<NavigationView>(R.id.nav_view)
-        val toggle = ActionBarDrawerToggle(
-            this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
-        )
-        drawer.addDrawerListener(toggle)
-        toggle.syncState()
-        navigationView.setNavigationItemSelectedListener(this)
 
-        //Set default fragment
-        navigationView.setCheckedItem(R.id.nav_single_account)
-        setCurrentFragment(AppFragment.SingleAccount)
+        setContent {
+            MsidentitykotlinsampleTheme {
+                Content()
+            }
+        }
     }
+}
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
-        drawer.addDrawerListener(object : DrawerListener {
-            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
-            override fun onDrawerOpened(drawerView: View) {}
-            override fun onDrawerClosed(drawerView: View) {
-                // Handle navigation view item clicks here.
-                val id = item.itemId
-                if (id == R.id.nav_single_account) {
-                    setCurrentFragment(AppFragment.SingleAccount)
+internal enum class AccountMode(val label: String, val iconResource: Int) {
+    SingleAccount("Single account", R.drawable.ic_single_account_24dp),
+    MultipleAccount("Multiple account", R.drawable.ic_multiple_account_24dp),
+}
+
+@Composable
+private fun Content() {
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    var selectedMode by remember { mutableStateOf(AccountMode.SingleAccount) }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Column(Modifier.padding(12.dp)) {
+                    Text("Account Mode", modifier = Modifier.padding(16.dp))
+
+                    for (mode in AccountMode.entries) {
+                        NavigationDrawerItem(
+                            icon = {
+                                Icon(
+                                    painterResource(id = mode.iconResource),
+                                    contentDescription = null,
+                                )
+                            },
+                            label = { Text(text = mode.label) },
+                            selected = mode == selectedMode,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                selectedMode = mode
+                            }
+                        )
+                    }
                 }
-                if (id == R.id.nav_multiple_account) {
-                    setCurrentFragment(AppFragment.MultipleAccount)
-                }
-
-                drawer.removeDrawerListener(this)
-            }
-
-            override fun onDrawerStateChanged(newState: Int) {}
-        })
-        drawer.closeDrawer(GravityCompat.START)
-        return true
-    }
-
-    private fun setCurrentFragment(newFragment: AppFragment) {
-        if (newFragment == mCurrentFragment) {
-            return
-        }
-        mCurrentFragment = newFragment
-        setHeaderString(mCurrentFragment)
-        displayFragment(mCurrentFragment)
-    }
-
-    private fun setHeaderString(fragment: AppFragment?) {
-        when (fragment) {
-            AppFragment.SingleAccount -> {
-                supportActionBar!!.title = "Single Account Mode"
-                supportActionBar!!.setBackgroundDrawable(ColorDrawable(Color.BLUE))
-                return
-            }
-            AppFragment.MultipleAccount -> {
-                supportActionBar!!.title = "Multiple Account Mode"
-                supportActionBar!!.setBackgroundDrawable(ColorDrawable(Color.BLUE))
-                return
-            }
-
-            else -> {
-                return
             }
         }
-    }
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.primary,
+                    ),
+                    title = {
+                        Text("${selectedMode.label} mode")
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            scope.launch { drawerState.open() }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Menu,
+                                contentDescription = "Open navigation drawer"
+                            )
+                        }
+                    },
+                )
+            },
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState)
+            },
+        ) { contentPadding ->
 
-    private fun displayFragment(fragment: AppFragment?) {
-        when (fragment) {
-            AppFragment.SingleAccount -> {
-                attachFragment(SingleAccountModeFragment())
-                return
-            }
-            AppFragment.MultipleAccount -> {
-                attachFragment(MultipleAccountModeFragment())
-                return
-            }
+            when (selectedMode) {
+                AccountMode.SingleAccount -> SingleAccountModeScreen(
+                    snackbarHostState = snackbarHostState,
+                    modifier = Modifier.padding(contentPadding),
+                )
 
-
-            else -> {
-                return
+                AccountMode.MultipleAccount -> MultiAccountModeScreen(
+                    snackbarHostState = snackbarHostState,
+                    modifier = Modifier.padding(contentPadding),
+                )
             }
         }
-    }
-
-    private fun attachFragment(fragment: Fragment) {
-        supportFragmentManager
-            .beginTransaction()
-            .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-            .replace(mContentMain!!.id, fragment)
-            .commit()
     }
 }
