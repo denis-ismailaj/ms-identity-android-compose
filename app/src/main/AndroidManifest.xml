@@ -7,12 +7,12 @@
         android:icon="@mipmap/ic_launcher"
         android:label="ms-identity-kotlin-sample"
         android:supportsRtl="true"
+        android:theme="@style/android:Theme.Material.Light.NoActionBar"
         tools:ignore="DataExtractionRules">
 
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/android:Theme.Material.Light.NoActionBar">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
