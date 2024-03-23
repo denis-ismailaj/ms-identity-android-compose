@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.azuresamples.msalandroidcomposeapp.MSGraphRequestWrapper
-import com.azuresamples.msalandroidcomposeapp.PublicClientApplicationExt
+import com.azuresamples.msalandroidcomposeapp.msal.PublicClientApplicationExt
 import com.azuresamples.msalandroidcomposeapp.R
 import com.microsoft.identity.client.AcquireTokenParameters
 import com.microsoft.identity.client.AcquireTokenSilentParameters

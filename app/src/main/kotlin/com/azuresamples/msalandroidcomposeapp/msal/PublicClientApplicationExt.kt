@@ -1,4 +1,4 @@
-package com.azuresamples.msalandroidcomposeapp
+package com.azuresamples.msalandroidcomposeapp.msal
 
 import android.content.Context
 import com.microsoft.identity.client.IMultipleAccountPublicClientApplication
@@ -52,4 +52,3 @@ object PublicClientApplicationExt {
             )
         }
 }
-
