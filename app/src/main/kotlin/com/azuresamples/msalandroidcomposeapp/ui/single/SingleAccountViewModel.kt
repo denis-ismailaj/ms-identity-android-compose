@@ -6,13 +6,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.azuresamples.msalandroidcomposeapp.MSGraphRequestWrapper
-import com.azuresamples.msalandroidcomposeapp.msal.PublicClientApplicationExt
+import com.microsoft.identity.client.ktx.PublicClientApplicationKtx
 import com.azuresamples.msalandroidcomposeapp.R
-import com.azuresamples.msalandroidcomposeapp.msal.acquireTokenSilentSuspend
-import com.azuresamples.msalandroidcomposeapp.msal.acquireTokenSuspend
-import com.azuresamples.msalandroidcomposeapp.msal.getCurrentAccountSuspend
-import com.azuresamples.msalandroidcomposeapp.msal.signIn
-import com.azuresamples.msalandroidcomposeapp.msal.signOutSuspend
+import com.microsoft.identity.client.ktx.acquireTokenSilentSuspend
+import com.microsoft.identity.client.ktx.acquireTokenSuspend
+import com.microsoft.identity.client.ktx.getCurrentAccountSuspend
+import com.microsoft.identity.client.ktx.signIn
+import com.microsoft.identity.client.ktx.signOutSuspend
 import com.microsoft.identity.client.AcquireTokenParameters
 import com.microsoft.identity.client.AcquireTokenSilentParameters
 import com.microsoft.identity.client.IAccount
@@ -62,7 +62,7 @@ class SingleAccountViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                app.value = PublicClientApplicationExt.createSingleAccountPublicClientApplication(
+                app.value = PublicClientApplicationKtx.createSingleAccountPublicClientApplication(
                     context, R.raw.auth_config_single_account
                 )
             } catch (exception: Exception) {

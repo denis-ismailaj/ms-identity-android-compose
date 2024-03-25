@@ -7,11 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.azuresamples.msalandroidcomposeapp.MSGraphRequestWrapper
 import com.azuresamples.msalandroidcomposeapp.R
-import com.azuresamples.msalandroidcomposeapp.msal.PublicClientApplicationExt
-import com.azuresamples.msalandroidcomposeapp.msal.acquireTokenSilentSuspend
-import com.azuresamples.msalandroidcomposeapp.msal.acquireTokenSuspend
-import com.azuresamples.msalandroidcomposeapp.msal.getAccountsSuspend
-import com.azuresamples.msalandroidcomposeapp.msal.removeAccountSuspend
+import com.microsoft.identity.client.ktx.PublicClientApplicationKtx
+import com.microsoft.identity.client.ktx.acquireTokenSilentSuspend
+import com.microsoft.identity.client.ktx.acquireTokenSuspend
+import com.microsoft.identity.client.ktx.getAccountsSuspend
+import com.microsoft.identity.client.ktx.removeAccountSuspend
 import com.microsoft.identity.client.AcquireTokenParameters
 import com.microsoft.identity.client.AcquireTokenSilentParameters
 import com.microsoft.identity.client.IAccount
@@ -57,7 +57,7 @@ class MultiAccountViewModel : ViewModel() {
     fun initAuth(context: Context) {
         viewModelScope.launch {
             try {
-                app.value = PublicClientApplicationExt.createMultipleAccountPublicClientApplication(
+                app.value = PublicClientApplicationKtx.createMultipleAccountPublicClientApplication(
                     context, R.raw.auth_config_multiple_account
                 )
             } catch (exception: Exception) {

@@ -4,6 +4,8 @@ This project is a rewrite
 of [`Azure-Samples/ms-identity-android-kotlin`](https://github.com/Azure-Samples/ms-identity-android-kotlin)
 using Jetpack Compose and modern Android development practices.
 
+It also makes use of [msal-android-ktx](https://github.com/denis-ismailaj/msal-android-ktx).
+
 For additional information, check out the original repo or
 the [MSAL library](https://github.com/AzureAD/microsoft-authentication-library-for-android).
 

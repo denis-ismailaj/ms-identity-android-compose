@@ -74,4 +74,8 @@ dependencies {
     implementation("com.microsoft.identity.client:msal:5.2.0") {
         exclude(group = "com.microsoft.device.display")
     }
+
+    implementation("com.github.denis-ismailaj:msal-android-ktx:0.1.0") {
+        exclude(group = "com.microsoft.device.display")
+    }
 }
